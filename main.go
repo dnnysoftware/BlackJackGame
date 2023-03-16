@@ -8,6 +8,7 @@ import (
 
 type Hand []deck.Card
 
+// ToString method for each Hand
 func (h Hand) String() string {
 	strs := make([]string, len(h))
 	for i := range h {
@@ -16,10 +17,12 @@ func (h Hand) String() string {
 	return strings.Join(strs, ", ")
 }
 
+// The initial state shown of the Dealer Hand
 func (h Hand) DealerString() string {
 	return h[0].String() + ", *HIDDEN*"
 }
 
+// Levys upper quartile cards to a value of 10 i.e. Jack, Queen, King
 func (h Hand) MinScore() int {
 	score := 0
 	for _, card := range h {
@@ -28,11 +31,13 @@ func (h Hand) MinScore() int {
 	return score
 }
 
+// Assigns most logical score for player based on Ace rule
 func (h Hand) Score() int {
 	minScore := h.MinScore()
 	if minScore > 11 {
 		return minScore
 	}
+	// Ace card handler for either 1 or 11
 	for _, card := range h {
 		if card.Rank == deck.Ace {
 			return minScore + 10
@@ -56,6 +61,7 @@ type GameState struct {
 	Dealer Hand
 }
 
+// Games state of which player is drawing cards
 func (gs *GameState) CurrentPlayer() *Hand {
 	switch gs.State {
 	case StatePlayerTurn:
@@ -67,6 +73,7 @@ func (gs *GameState) CurrentPlayer() *Hand {
 	}
 }
 
+// Clones the game state
 func clone(gs GameState) GameState {
 	ret := GameState{
 		Deck:   make([]deck.Card, len(gs.Deck)),
@@ -80,10 +87,12 @@ func clone(gs GameState) GameState {
 	return ret
 }
 
+// Draws the card and removes it from cards deck
 func draw(cards []deck.Card) (deck.Card, []deck.Card) {
 	return cards[0], cards[1:]
 }
 
+// Gets the min
 func min(a, b int) int {
 	if a < b {
 		return a
@@ -91,12 +100,14 @@ func min(a, b int) int {
 	return b
 }
 
+// Creates a new shoe of cards with 8 decks in a shoe
 func Shuffle(gs GameState) GameState {
 	ret := clone(gs)
-	ret.Deck = deck.New(deck.Deck(6), deck.Shuffle)
+	ret.Deck = deck.New(deck.Deck(8), deck.Shuffle)
 	return ret
 }
 
+// Deal the cards to each player and dealer
 func Deal(gs GameState) GameState {
 	ret := clone(gs)
 	ret.Player = make(Hand, 0, 9)
@@ -112,6 +123,7 @@ func Deal(gs GameState) GameState {
 	return ret
 }
 
+// Removes random card from the top of the shoe
 func Hit(gs GameState) GameState {
 	ret := clone(gs)
 	hand := ret.CurrentPlayer()
@@ -124,12 +136,14 @@ func Hit(gs GameState) GameState {
 	return ret
 }
 
+// Goes to the dealer or ends the game, changes the game state
 func Stand(gs GameState) GameState {
 	ret := clone(gs)
 	ret.State++
 	return ret
 }
 
+// Determines end game state where you win, lose or draw
 func EndHand(gs GameState) GameState {
 	ret := clone(gs)
 	pScore, dScore := ret.Player.Score(), ret.Dealer.Score()
@@ -158,13 +172,16 @@ func main() {
 	gs = Shuffle(gs)
 	var input string
 gameLoop:
-	for input != "q" {
+	// Can't continue if theres less than half a deck in shoe to prevent card counting
+	for input != "q" && len(gs.Deck) > 31 {
 		gs = Deal(gs)
-		pScore := gs.Player.Score()
-		if pScore == 21 {
+		pScore, dScore := gs.Player.Score(), gs.Dealer.Score()
+		// Determines if either player or dealer wins off rip
+		if pScore == 21 || dScore == 21 {
 			gs = EndHand(gs)
 
 		} else {
+			// Player choices
 			for gs.State == StatePlayerTurn {
 				fmt.Println("Player:", gs.Player)
 				fmt.Println("Dealer:", gs.Dealer.DealerString())
@@ -194,5 +211,7 @@ gameLoop:
 		}
 		fmt.Println()
 	}
-
+	if len(gs.Deck) == 0 {
+		fmt.Println("Ran out of cards, please restart the game!")
+	}
 }

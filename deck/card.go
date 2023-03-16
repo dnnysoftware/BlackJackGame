@@ -50,6 +50,7 @@ type Card struct {
 	Rank
 }
 
+// ToString for each card to show it's Suit and Rank
 func (c Card) String() string {
 	if c.Suit == Joker {
 		return c.Suit.String()
@@ -57,6 +58,7 @@ func (c Card) String() string {
 	return fmt.Sprintf("%s of %ss", c.Rank.String(), c.Suit.String())
 }
 
+// Creates new deck of cards based on constant values
 func New(opts ...func([]Card) []Card) []Card {
 	var cards []Card
 	for _, suit := range suits {
