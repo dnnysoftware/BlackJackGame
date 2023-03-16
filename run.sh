@@ -1,1 +1,1 @@
-go build . && go run blackjack.go
+go build . && go run main.go
