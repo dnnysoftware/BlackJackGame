@@ -87,7 +87,7 @@ func clone(gs GameState) GameState {
 	return ret
 }
 
-// Draws the card and removes it from cards deck
+// Draws the 0th card and removes it from cards deck and returns card and updated cards deck
 func draw(cards []deck.Card) (deck.Card, []deck.Card) {
 	return cards[0], cards[1:]
 }
@@ -198,7 +198,7 @@ gameLoop:
 					fmt.Println("Invalid Option: ", input)
 				}
 			}
-
+			// Dealer choice conditions
 			for gs.State == StateDealerTurn {
 				if gs.Dealer.Score() <= 16 || (gs.Dealer.Score() == 17 && gs.Dealer.MinScore() != 17) {
 					gs = Hit(gs)
