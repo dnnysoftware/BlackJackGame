@@ -211,7 +211,7 @@ gameLoop:
 		}
 		fmt.Println()
 	}
-	if len(gs.Deck) == 0 {
+	if len(gs.Deck) <= 31 {
 		fmt.Println("Ran out of cards, please restart the game!")
 	}
 }
